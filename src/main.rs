@@ -24,7 +24,7 @@ impl Opcode {
             0x01 => Some(Opcode::Mov),
             0x02 => Some(Opcode::Add),
             0x03 => Some(Opcode::Sub),
-            0x04 => Some(Opcode::Nop),
+            0x00 => Some(Opcode::Nop),
             0x87 => Some(Opcode::End),
             _    => None,
         }
