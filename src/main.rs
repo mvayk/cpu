@@ -1,6 +1,9 @@
 use std::fs;
 use std::{thread, time};
 
+const FILE_PATH: &str = "executable.g";
+const MEM_SIZE: usize = 32;
+
 /* opcodes */
 #[repr(u8)]
 enum Opcode {
@@ -27,11 +30,11 @@ impl Opcode {
 
 /* memory implementation */
 struct Memory<> {
-    mem: [u8; 32],
+    mem: [u8; MEM_SIZE],
 }
 
 impl Memory {
-    fn load(&mut self, values: [u8; 32]) {
+    fn load(&mut self, values: [u8; MEM_SIZE]) {
         for index in 0..self.mem.len() {
             self.mem[index] = values[index];
         }
@@ -90,8 +93,6 @@ impl CPU {
     }
 }
 
-const FILE_PATH: &str = "executable.g";
-
 fn main() -> std::io::Result<()> {
     let mut cpu = CPU {
         power: true,
@@ -111,7 +112,7 @@ fn main() -> std::io::Result<()> {
         .expect("failed to find executable file");
 
     for (index, token) in executable.split_whitespace().enumerate() {
-        if index >= 32 {
+        if index >= MEM_SIZE {
             break;
         }
 
