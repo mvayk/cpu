@@ -1,12 +1,5 @@
 use std::{thread, time};
 
-/* sample program */
-const SAMPLE_PROGRAM: [i32; 3] = [
-    0x00,
-    0x00,
-    0x00,
-];
-
 /* opcodes */
 #[repr(u8)]
 enum Opcode {
