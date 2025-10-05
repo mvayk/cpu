@@ -63,22 +63,29 @@ impl CPU {
         self.current_cycle += 1;
     }
 
-    fn add(&mut self) {
+    fn add(&mut self) -> usize {
         self.rax += self.rip;
+        2
     }
 
-    fn sub(&mut self) {
+    fn sub(&mut self) -> usize {
         self.rax -= self.rip;
+        2
     }
 
-    fn execute(&mut self, rsp: u8, rip: u8, memory: &Memory) {
+    fn set_rax(&mut self, value: u8) -> usize {
+        self.rax = value;
+        2
+    }
+
+    fn execute(&mut self, rsp: u8, rip: u8, memory: &Memory) -> usize {
         match Opcode::from_u8(rsp) {
             Some(Opcode::Add) => self.add(),
             Some(Opcode::Sub) => self.sub(),
-            Some(Opcode::Mov) => self.rax = rip,
-            Some(Opcode::Nop) => print!(""),
-            Some(Opcode::End) => println!("end"),
-            None => println!("unknown opcode"),
+            Some(Opcode::Mov) => self.set_rax(rip),
+            Some(Opcode::Nop) => 1,
+            Some(Opcode::End) => 1,
+            None => 1,
         }
     }
 }
@@ -112,16 +119,21 @@ fn main() -> std::io::Result<()> {
         memory.mem[index] = u8::from_str_radix(hex, 16).unwrap();
     }
 
+    let mut index = 0;
+    let mut increment = 0;
+
     while cpu.power == true {
-        for index in 0..memory.mem.len() {
+        while index < memory.mem.len() {
+            index = index + increment;
+            println!("{index}");
             thread::sleep(time::Duration::from_millis(10));
             cpu.rsp = memory.read(index);
 
-            if cpu.rsp != Opcode::End as u8 || index == 32 {
+            if cpu.rsp != Opcode::End as u8 && index < memory.mem.len() {
                 cpu.rip = memory.read(index + 1);
-                cpu.execute(cpu.rsp, cpu.rip, &memory);
+                increment = cpu.execute(cpu.rsp, cpu.rip, &memory);
             } else {
-                println!("program ended: 0x87");
+                println!("program ended");
                 cpu.power = false; break
             }
 
