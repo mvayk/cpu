@@ -1,6 +1,4 @@
-use std::env;
 use std::fs;
-use std::ptr::with_exposed_provenance_mut;
 use std::{thread, time};
 
 /* opcodes */
