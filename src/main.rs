@@ -1,3 +1,6 @@
+use std::env;
+use std::fs;
+use std::ptr::with_exposed_provenance_mut;
 use std::{thread, time};
 
 /* opcodes */
@@ -30,6 +33,12 @@ struct Memory<> {
 }
 
 impl Memory {
+    fn load(&mut self, values: [u8; 32]) {
+        for index in 0..self.mem.len() {
+            self.mem[index] = values[index];
+        }
+    }
+
     fn write(&mut self, index: usize, value: u8) {
         self.mem[index] = value;
     }
@@ -71,10 +80,12 @@ impl CPU {
             Some(Opcode::Mov) => self.rax = rip,
             Some(Opcode::Nop) => print!(""),
             Some(Opcode::End) => println!("end"),
-            None => println!("unknwon"),
+            None => println!("unknown opcode"),
         }
     }
 }
+
+const FILE_PATH: &str = "executable.g";
 
 fn main() -> std::io::Result<()> {
     let mut cpu = CPU {
@@ -88,21 +99,27 @@ fn main() -> std::io::Result<()> {
     };
 
     let mut memory = Memory {
-        //
-        // mov 0x50 to rax
-        // add 0x50 to whatever is on rax
-        //
-        mem: [0x01,0x32,0x02,0x32,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-              0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-              0x00,0x00,0x00,0x00,0x00,0x87]
+        mem: [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
     };
+
+    let executable = std::fs::read_to_string(FILE_PATH)
+        .expect("failed to find executable file");
+
+    for (index, token) in executable.split_whitespace().enumerate() {
+        if index >= 32 {
+            break;
+        }
+
+        let hex = token.trim_start_matches("0x");
+        memory.mem[index] = u8::from_str_radix(hex, 16).unwrap();
+    }
 
     while cpu.power == true {
         for index in 0..memory.mem.len() {
             thread::sleep(time::Duration::from_millis(10));
             cpu.rsp = memory.read(index);
 
-            if cpu.rsp != Opcode::End as u8 {
+            if cpu.rsp != Opcode::End as u8 || index == 32 {
                 cpu.rip = memory.read(index + 1);
                 cpu.execute(cpu.rsp, cpu.rip, &memory);
             } else {
