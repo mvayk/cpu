@@ -1,7 +1,0 @@
-#+Title:  CPU Emulator
-
-* Resources
-https://github.com/michidk/simple-cpu-emulator
-https://gecko05.github.io/2022/10/22/first-emulator-part1.html
-https://doc.rust-lang.org/rust-by-example/primitives/array.html
-https://medium.com/@smbaker/i-wrote-an-8008-cpu-emulator-in-go-in-one-day-0d23431085ca
